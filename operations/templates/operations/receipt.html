@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Receipt — Job Card #{{ job_card.pk }}{% endblock %}
+{% block content %}
+<div class="card p-4 mx-auto oas-receipt" style="max-width: 480px;">
+  <div class="text-center mb-3">
+    <h2 class="h4 mb-0">Oyera Auto Service Bay Ltd</h2>
+    <p class="text-muted mb-0">Payment Receipt</p>
+  </div>
+  <hr>
+  <p class="mb-1"><strong>Receipt #</strong> {{ payment.pk }}</p>
+  <p class="mb-1"><strong>Date</strong> {{ payment.paid_at|date:"d M Y, H:i" }}</p>
+  <p class="mb-1"><strong>Job Card #</strong> {{ job_card.pk }}</p>
+  <p class="mb-1"><strong>Customer</strong> {{ job_card.customer.full_name }}</p>
+  {% if job_card.vehicle %}<p class="mb-1"><strong>Vehicle</strong> {{ job_card.vehicle }}</p>{% endif %}
+  <hr>
+  <p class="d-flex justify-content-between"><span>Amount paid</span><strong>UGX {{ payment.amount|floatformat:0 }}</strong></p>
+  <p class="d-flex justify-content-between"><span>Method</span><span>{{ payment.get_method_display }}</span></p>
+  <p class="d-flex justify-content-between"><span>Job card total</span><span>UGX {{ job_card.total|floatformat:0 }}</span></p>
+  <p class="d-flex justify-content-between mb-0"><span>Balance remaining</span><span>UGX {{ job_card.balance|floatformat:0 }}</span></p>
+  <hr>
+  <p class="text-center text-muted small mb-0">Received by {{ payment.received_by|default:"—" }}</p>
+</div>
+<div class="text-center mt-3 d-print-none">
+  <button class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
+  <a href="{% url 'job_card_detail' job_card.pk %}" class="btn btn-outline-primary">Back to job card</a>
+</div>
+{% endblock %}

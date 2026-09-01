@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Add vehicle — OAS Bay{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3"><i class="bi bi-car-front"></i> Add vehicle for {{ customer.full_name }}</h1>
+<div class="card p-4" style="max-width: 480px;">
+  <form method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary mt-2"><i class="bi bi-check-lg"></i> Save vehicle</button>
+  </form>
+</div>
+{% endblock %}

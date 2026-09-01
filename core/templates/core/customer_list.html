@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Customers — OAS Bay{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h1 class="h3 mb-0"><i class="bi bi-people"></i> Customers</h1>
+  <a href="{% url 'customer_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New customer</a>
+</div>
+
+<form method="get" class="mb-3">
+  <div class="input-group">
+    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by name, phone, or plate number">
+    <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i></button>
+  </div>
+</form>
+
+<div class="card">
+  <table class="table table-hover mb-0 align-middle">
+    <thead><tr><th>Name</th><th>Phone</th><th>Vehicles</th><th></th></tr></thead>
+    <tbody>
+    {% for customer in customers %}
+      <tr>
+        <td>{{ customer.full_name }}</td>
+        <td>{{ customer.phone }}</td>
+        <td>{{ customer.vehicles.count }}</td>
+        <td class="text-end"><a href="{% url 'customer_detail' customer.pk %}" class="btn btn-sm btn-outline-primary" title="View" aria-label="View {{ customer.full_name }}"><i class="bi bi-eye"></i></a></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4" class="text-center text-muted py-4">No customers yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include 'partials/pagination.html' with page_obj=customers %}
+{% endblock %}

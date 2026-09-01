@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Technicians — OAS Bay{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h1 class="h3 mb-0"><i class="bi bi-person-badge"></i> Technicians</h1>
+  <a href="{% url 'technician_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New technician</a>
+</div>
+
+{% for technician in technicians %}
+<form id="tech-form-{{ technician.pk }}" method="post" action="{% url 'technician_update' technician.pk %}">{% csrf_token %}</form>
+{% endfor %}
+
+<div class="card">
+  <table class="table table-hover mb-0 align-middle">
+    <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Active</th><th></th></tr></thead>
+    <tbody>
+    {% for technician in technicians %}
+      <tr>
+        <td>{{ technician.get_full_name|default:"—" }}</td>
+        <td>{{ technician.username }}</td>
+        <td>{{ technician.email|default:"—" }}</td>
+        <td>
+          <select name="role" form="tech-form-{{ technician.pk }}" class="form-select form-select-sm">
+            {% with current_role=technician.groups.first.name %}
+            {% for value, label in role_choices %}
+              <option value="{{ value }}" {% if value == current_role %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+            {% endwith %}
+          </select>
+        </td>
+        <td>
+          <div class="form-check form-switch">
+            <input type="checkbox" class="form-check-input" name="is_active" form="tech-form-{{ technician.pk }}" {% if technician.is_active %}checked{% endif %}>
+          </div>
+        </td>
+        <td class="text-end">
+          <button type="submit" form="tech-form-{{ technician.pk }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-check-lg"></i> Save</button>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6" class="text-center text-muted py-4">No technicians yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

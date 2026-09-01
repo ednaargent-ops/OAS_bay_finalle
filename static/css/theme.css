@@ -1,0 +1,276 @@
+:root {
+  --oas-midnight: #14163A;
+  --oas-midnight-2: #1F2361;
+  --oas-vanilla: #F3E9D2;
+  --oas-vanilla-soft: #FBF6EA;
+  --oas-ink: #211F1A;
+  --oas-muted: #6B6558;
+  --oas-border: #E3D8B8;
+}
+
+body {
+  background-color: var(--oas-vanilla-soft);
+  color: var(--oas-ink);
+}
+
+a {
+  color: var(--oas-midnight);
+}
+a:hover {
+  color: var(--oas-midnight-2);
+}
+
+/* Top bar (mobile only) */
+.oas-topbar {
+  background-color: var(--oas-midnight);
+  border-bottom: 3px solid var(--oas-vanilla);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+}
+.oas-topbar-brand {
+  color: var(--oas-vanilla) !important;
+  text-decoration: none;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Layout */
+.oas-layout {
+  display: flex;
+  min-height: 100vh;
+}
+.oas-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 1.5rem;
+}
+@media (min-width: 992px) {
+  .oas-content {
+    padding: 2rem;
+  }
+}
+.oas-content-centered {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Sidebar
+   Note: Bootstrap's responsive offcanvas (.offcanvas-lg) forces
+   background-color: transparent !important on itself and on
+   .offcanvas-body once the viewport hits the lg breakpoint, so painting
+   the background on those elements directly does not work at desktop
+   widths. .oas-sidebar-surface is an inner wrapper Bootstrap never
+   touches, and carries the actual fill + text color instead. */
+.oas-sidebar {
+  width: 260px;
+}
+@media (min-width: 992px) {
+  .oas-sidebar {
+    flex: 0 0 260px;
+    border-right: 3px solid var(--oas-vanilla);
+  }
+}
+.oas-sidebar-surface {
+  background-color: var(--oas-midnight);
+  color: var(--oas-vanilla);
+  min-height: 100%;
+}
+@media (min-width: 992px) {
+  /* Bootstrap's .offcanvas-lg only becomes a flex column inside its
+     mobile (max-width) media query — at this breakpoint it reverts to a
+     plain block div, so flex-grow on .offcanvas-body has no containing
+     flex context to act in and the body (and our surface fill inside
+     it) only grows to fit its own content, leaving the rest of the
+     already-stretched sidebar box unpainted below it. Re-establish the
+     flex column here so the body/surface can grow to fill it. */
+  .oas-sidebar {
+    display: flex;
+    flex-direction: column;
+  }
+  .oas-sidebar .offcanvas-body {
+    flex: 1 1 auto;
+  }
+}
+.oas-sidebar-brand {
+  color: var(--oas-vanilla);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.15rem;
+  padding: 1.25rem 1.25rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.oas-sidebar-nav {
+  padding: 0.5rem 0.75rem;
+}
+.oas-sidebar-nav .nav-link {
+  color: var(--oas-vanilla);
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 500;
+}
+.oas-sidebar-nav .nav-link i {
+  font-size: 1.1rem;
+}
+.oas-sidebar-nav .nav-link:hover {
+  background-color: rgba(243, 233, 210, 0.1);
+  color: #ffffff;
+}
+.oas-sidebar-nav .nav-link.active {
+  background-color: var(--oas-vanilla);
+  color: var(--oas-midnight);
+}
+.oas-sidebar-footer {
+  padding: 1rem 1.25rem 1.25rem;
+  border-top: 1px solid rgba(243, 233, 210, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.oas-sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.oas-sidebar-user i {
+  font-size: 1.8rem;
+}
+.oas-sidebar-username {
+  font-weight: 600;
+  line-height: 1.2;
+}
+.oas-badge {
+  background-color: var(--oas-vanilla);
+  color: var(--oas-midnight);
+  font-weight: 600;
+}
+.oas-btn-outline {
+  border: 1px solid var(--oas-vanilla);
+  color: var(--oas-vanilla);
+  background: transparent;
+}
+.oas-btn-outline:hover {
+  background: var(--oas-vanilla);
+  color: var(--oas-midnight);
+}
+
+/* Cards */
+.card {
+  background-color: var(--oas-vanilla);
+  border: 1px solid var(--oas-border);
+}
+.card-header {
+  background-color: var(--oas-midnight);
+  color: var(--oas-vanilla);
+  border-bottom: none;
+  font-weight: 600;
+}
+.card-footer {
+  background-color: var(--oas-vanilla-soft);
+  border-top: 1px solid var(--oas-border);
+}
+.list-group-item {
+  background-color: transparent;
+  border-color: var(--oas-border);
+  color: var(--oas-ink);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--oas-midnight);
+  border-color: var(--oas-midnight);
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--oas-midnight-2);
+  border-color: var(--oas-midnight-2);
+}
+.btn-outline-primary {
+  color: var(--oas-midnight);
+  border-color: var(--oas-midnight);
+}
+.btn-outline-primary:hover {
+  background-color: var(--oas-midnight);
+  border-color: var(--oas-midnight);
+  color: var(--oas-vanilla);
+}
+
+/* Tables
+   Bootstrap's table cells read color/background from the
+   --bs-table-color / --bs-table-bg custom properties (set directly on
+   each <th>/<td>, not just inherited), so a plain "color:" declaration
+   on thead loses to that. Overriding the variables themselves is what
+   actually reaches the cells. */
+.table {
+  --bs-table-bg: transparent;
+}
+.table > thead {
+  --bs-table-bg: var(--oas-midnight);
+  --bs-table-color: var(--oas-vanilla);
+}
+.pagination .page-link {
+  color: var(--oas-midnight);
+}
+.pagination .page-item.active .page-link {
+  background-color: var(--oas-midnight);
+  border-color: var(--oas-midnight);
+  color: var(--oas-vanilla);
+}
+.pagination .page-item.disabled .page-link {
+  color: var(--oas-muted);
+}
+
+/* Tabs */
+.nav-tabs {
+  border-bottom-color: var(--oas-border);
+}
+.nav-tabs .nav-link {
+  color: var(--oas-muted);
+}
+.nav-tabs .nav-link:hover {
+  border-color: var(--oas-border);
+}
+.nav-tabs .nav-link.active {
+  color: var(--oas-midnight);
+  font-weight: 600;
+  border-color: var(--oas-border) var(--oas-border) var(--oas-vanilla-soft);
+}
+
+/* Status badges */
+.oas-status-open { background-color: #8A6D3B; }
+.oas-status-in_progress { background-color: #2A5560; }
+.oas-status-completed { background-color: #3E7A4C; }
+.oas-status-paid { background-color: var(--oas-midnight); }
+
+/* Payment status badges */
+.oas-payment-unpaid { background-color: #8A6D3B; }
+.oas-payment-partial { background-color: #2A5560; }
+.oas-payment-paid { background-color: #3E7A4C; }
+
+/* Forms */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--oas-midnight);
+  box-shadow: 0 0 0 0.2rem rgba(20, 22, 58, 0.15);
+}
+
+/* Receipt */
+.oas-receipt {
+  background-color: #ffffff;
+}
+
+@media print {
+  .oas-topbar, .oas-sidebar, .d-print-none {
+    display: none !important;
+  }
+}

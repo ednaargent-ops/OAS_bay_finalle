@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Inventory — OAS Bay{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h1 class="h3 mb-0"><i class="bi bi-box-seam"></i> Inventory</h1>
+  {% if user.is_superuser %}
+  <a href="{% url 'spare_part_restock' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add inventory</a>
+  {% endif %}
+</div>
+
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item"><a class="nav-link active" href="{% url 'spare_part_list' %}">Spare parts</a></li>
+  <li class="nav-item"><a class="nav-link" href="{% url 'service_list' %}">Services</a></li>
+</ul>
+
+<form method="get" class="mb-3">
+  <div class="input-group">
+    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by name or compatibility">
+    <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i></button>
+  </div>
+</form>
+
+<div class="card">
+  <table class="table table-hover mb-0 align-middle">
+    <thead><tr><th>Name</th><th>Compatibility</th>{% if user.is_superuser %}<th>Cost price</th>{% endif %}<th>Selling price</th><th>In stock</th><th>Stock status</th><th></th></tr></thead>
+    <tbody>
+    {% for part in parts %}
+      <tr>
+        <td>{{ part.name }}</td>
+        <td>{{ part.compatibility|default:"All vehicles" }}</td>
+        {% if user.is_superuser %}<td>UGX {{ part.cost_price|floatformat:0 }}</td>{% endif %}
+        <td>UGX {{ part.selling_price|floatformat:0 }}</td>
+        <td>{{ part.quantity_in_stock }}</td>
+        <td>
+          {% if part.quantity_in_stock < 10 %}
+          <span class="badge bg-danger">Low stock</span>
+          {% else %}
+          <span class="badge bg-success">High stock</span>
+          {% endif %}
+          {% if not part.active %}
+          <span class="badge bg-secondary">Inactive</span>
+          {% endif %}
+        </td>
+        <td class="text-end">
+          <a href="{% url 'spare_part_edit' part.pk %}" class="btn btn-sm btn-outline-primary" title="Edit" aria-label="Edit {{ part.name }}"><i class="bi bi-pencil-square"></i></a>
+          {% if perms.inventory.delete_sparepart %}
+          <form method="post" action="{% url 'spare_part_delete' part.pk %}" class="d-inline" onsubmit="return confirm('Delete {{ part.name|escapejs }}? This cannot be undone.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="{% if user.is_superuser %}7{% else %}6{% endif %}" class="text-center text-muted py-4">No spare parts yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include 'partials/pagination.html' with page_obj=parts %}
+{% endblock %}

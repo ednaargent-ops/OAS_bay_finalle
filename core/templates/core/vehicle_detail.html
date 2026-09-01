@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}{{ vehicle.plate_number }} — OAS Bay{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h1 class="h3 mb-0"><i class="bi bi-car-front"></i> {{ vehicle.make }} {{ vehicle.model }}</h1>
+  <p class="text-muted mb-0">
+    {{ vehicle.plate_number }} · {{ vehicle.get_duty_class_display }} ·
+    Owner: <a href="{% url 'customer_detail' vehicle.customer.pk %}">{{ vehicle.customer.full_name }}</a>
+  </p>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="h5 mb-0">Service history</h2>
+  <a href="{% url 'job_card_create' vehicle.customer.pk %}?vehicle={{ vehicle.pk }}" class="btn btn-primary btn-sm">
+    <i class="bi bi-clipboard2-plus"></i> New job card
+  </a>
+</div>
+<div class="card">
+  <table class="table mb-0 align-middle">
+    <thead><tr><th>Date</th><th>Visit</th><th>Status</th><th>Total</th><th></th></tr></thead>
+    <tbody>
+    {% for job_card in vehicle.job_cards.all %}
+      <tr>
+        <td>{{ job_card.created_at|date:"d M Y" }}</td>
+        <td>{{ job_card.get_visit_type_display }}</td>
+        <td><span class="badge oas-status-{{ job_card.status }}">{{ job_card.get_status_display }}</span></td>
+        <td>UGX {{ job_card.total|floatformat:0 }}</td>
+        <td class="text-end"><a href="{% url 'job_card_detail' job_card.pk %}" class="btn btn-sm btn-outline-primary" title="View" aria-label="View job card #{{ job_card.pk }}"><i class="bi bi-eye"></i></a></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="5" class="text-center text-muted py-4">No job cards yet for this vehicle.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Log in — OAS Bay{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center">
+  <div class="card p-4" style="max-width: 400px; width: 100%;">
+    <h1 class="h4 mb-3 text-center"><i class="bi bi-wrench-adjustable-circle-fill"></i> OAS Bay</h1>
+    <form method="post">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <button type="submit" class="btn btn-primary w-100 mt-2">Log in</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

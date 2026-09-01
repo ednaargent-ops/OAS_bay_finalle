@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Job Card #{{ job_card.pk }} — OAS Bay{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+  <div>
+    <h1 class="h3 mb-0">Job Card #{{ job_card.pk }}</h1>
+    <p class="text-muted mb-0">
+      <a href="{% url 'customer_detail' job_card.customer.pk %}">{{ job_card.customer.full_name }}</a>
+      {% if job_card.vehicle %} · {{ job_card.vehicle }}{% endif %}
+      · {{ job_card.get_visit_type_display }}
+    </p>
+  </div>
+  <span class="badge fs-6 oas-status-{{ job_card.status }}">{{ job_card.get_status_display }}</span>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-clipboard2-pulse"></i> Diagnosis</div>
+      <div class="card-body">
+        <p class="mb-1">{{ job_card.diagnosis_notes|default:"No notes yet." }}</p>
+        <p class="text-muted small mb-0">
+          Diagnosed by {{ job_card.diagnosed_by|default:"—" }} ·
+          Assigned:
+          {% for tech in job_card.assigned_technicians.all %}
+            {{ tech.get_full_name|default:tech.username }}{% if not forloop.last %}, {% endif %}
+          {% empty %}unassigned{% endfor %}
+        </p>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-tools"></i> Services</div>
+      <table class="table mb-0">
+        <tbody>
+        {% for line in job_card.service_lines.all %}
+          <tr>
+            <td>{{ line.service.name }}</td>
+            <td class="text-end">UGX {{ line.price_charged|floatformat:0 }}</td>
+            {% if perms.operations.delete_jobcardserviceline %}
+            <td class="text-end">
+              <form method="post" action="{% url 'job_card_remove_service' line.pk %}" class="d-inline" onsubmit="return confirm('Remove {{ line.service.name|escapejs }} from this job card?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+              </form>
+            </td>
+            {% endif %}
+          </tr>
+        {% empty %}
+          <tr><td class="text-muted">No services logged yet.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% if job_card.status != 'paid' and perms.operations.add_jobcardserviceline %}
+      <div class="card-footer">
+        <form method="post" action="{% url 'job_card_add_service' job_card.pk %}" class="row g-2 align-items-end">
+          {% csrf_token %}
+          <div class="col-8">{{ service_form.service|as_crispy_field }}</div>
+          <div class="col-4"><button class="btn btn-outline-primary w-100" type="submit"><i class="bi bi-plus-lg"></i> Add</button></div>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-box-seam"></i> Spare Parts</div>
+      <table class="table mb-0">
+        <tbody>
+        {% for line in job_card.part_lines.all %}
+          <tr>
+            <td>{{ line.spare_part.name }} × {{ line.quantity }}</td>
+            <td class="text-end">UGX {{ line.price_charged|floatformat:0 }} each</td>
+            {% if perms.operations.delete_jobcardpartline %}
+            <td class="text-end">
+              <form method="post" action="{% url 'job_card_remove_part' line.pk %}" class="d-inline" onsubmit="return confirm('Remove {{ line.spare_part.name|escapejs }} from this job card? Stock will be restored.');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+              </form>
+            </td>
+            {% endif %}
+          </tr>
+        {% empty %}
+          <tr><td class="text-muted">No parts logged yet.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% if job_card.status != 'paid' and perms.operations.add_jobcardpartline %}
+      <div class="card-footer">
+        <form method="post" action="{% url 'job_card_add_part' job_card.pk %}" class="row g-2 align-items-end">
+          {% csrf_token %}
+          <div class="col-6">{{ part_form.spare_part|as_crispy_field }}</div>
+          <div class="col-3">{{ part_form.quantity|as_crispy_field }}</div>
+          <div class="col-3"><button class="btn btn-outline-primary w-100" type="submit"><i class="bi bi-plus-lg"></i> Add</button></div>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-receipt-cutoff"></i> Total</div>
+      <div class="card-body">
+        <p class="d-flex justify-content-between"><span>Total</span><strong>UGX {{ job_card.total|floatformat:0 }}</strong></p>
+        <p class="d-flex justify-content-between"><span>Paid</span><span>UGX {{ job_card.amount_paid|floatformat:0 }}</span></p>
+        <p class="d-flex justify-content-between border-top pt-2 mb-0"><span>Balance</span><strong>UGX {{ job_card.balance|floatformat:0 }}</strong></p>
+      </div>
+    </div>
+
+    {% if job_card.balance > 0 and perms.operations.add_payment %}
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-cash-coin"></i> Record payment</div>
+      <div class="card-body">
+        <form method="post" action="{% url 'job_card_add_payment' job_card.pk %}">
+          {% csrf_token %}
+          {{ payment_form|crispy }}
+          <button type="submit" class="btn btn-primary w-100 mt-2">Record payment</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-list-check"></i> Payments</div>
+      <ul class="list-group list-group-flush">
+        {% for payment in job_card.payments.all %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>UGX {{ payment.amount|floatformat:0 }} · {{ payment.get_method_display }}</span>
+          {% if perms.operations.view_payment or perms.operations.add_payment %}
+          <a href="{% url 'receipt' payment.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-receipt"></i></a>
+          {% endif %}
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No payments yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    {% if perms.operations.change_jobcard %}
+    <div class="card">
+      <div class="card-header"><i class="bi bi-arrow-repeat"></i> Status</div>
+      <div class="card-body">
+        <form method="post" action="{% url 'job_card_update_status' job_card.pk %}" class="d-flex gap-2">
+          {% csrf_token %}
+          <select name="status" class="form-select">
+            {% for value, label in job_card.STATUS_CHOICES %}
+            <option value="{{ value }}" {% if value == job_card.status %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-outline-primary" type="submit"><i class="bi bi-check-lg"></i></button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

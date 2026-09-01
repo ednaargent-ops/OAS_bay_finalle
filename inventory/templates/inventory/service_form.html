@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}{% if service %}Edit {{ service.name }}{% else %}New service{% endif %} — OAS Bay{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3">
+  {% if service %}<i class="bi bi-pencil-square"></i> Edit {{ service.name }}{% else %}<i class="bi bi-plus-lg"></i> New service{% endif %}
+</h1>
+<div class="card p-4" style="max-width: 480px;">
+  <form method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary mt-2"><i class="bi bi-check-lg"></i> Save service</button>
+  </form>
+</div>
+{% endblock %}

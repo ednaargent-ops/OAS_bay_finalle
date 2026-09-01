@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — OAS Bay{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Dashboard</h1>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card p-3 h-100">
+      <div class="text-muted small">Total customers</div>
+      <div class="h3 mb-0">{{ total_customers }}</div>
+      <div class="small mt-1">
+        {% if customer_growth is not None %}
+          <span class="{% if customer_growth >= 0 %}text-success{% else %}text-danger{% endif %}">
+            <i class="bi {% if customer_growth >= 0 %}bi-arrow-up-right{% else %}bi-arrow-down-right{% endif %}"></i>
+            {{ customer_growth|floatformat:0 }}%
+          </span> vs last month
+        {% else %}
+          <span class="text-muted">{{ new_customers_this_month }} new this month</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card p-3 h-100">
+      <div class="text-muted small">Revenue this month</div>
+      <div class="h3 mb-0">UGX {{ revenue_this_month|floatformat:0 }}</div>
+      <div class="small mt-1">
+        {% if revenue_growth is not None %}
+          <span class="{% if revenue_growth >= 0 %}text-success{% else %}text-danger{% endif %}">
+            <i class="bi {% if revenue_growth >= 0 %}bi-arrow-up-right{% else %}bi-arrow-down-right{% endif %}"></i>
+            {{ revenue_growth|floatformat:0 }}%
+          </span> vs last month
+        {% else %}
+          <span class="text-muted">No revenue last month</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card p-3 h-100">
+      <div class="text-muted small">Today's revenue</div>
+      <div class="h3 mb-0">UGX {{ today_revenue|floatformat:0 }}</div>
+      <div class="small mt-1 text-muted">All-time: UGX {{ total_revenue|floatformat:0 }}</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card p-3 h-100">
+      <div class="text-muted small">Open job cards</div>
+      <div class="h3 mb-0">{{ open_job_cards }}</div>
+      <div class="small mt-1 text-muted">{{ low_stock|length }} part{{ low_stock|length|pluralize }} almost out of stock</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-graph-up-arrow"></i> Revenue trend (last 6 months)</div>
+      <div class="card-body">
+        <canvas id="revenueChart" height="220" aria-label="Monthly revenue over the last 6 months" role="img"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-person-plus"></i> New customers (last 6 months)</div>
+      <div class="card-body">
+        <canvas id="customersChart" height="220" aria-label="New customers per month over the last 6 months" role="img"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-bar-chart"></i> Most-performed services</div>
+      <ul class="list-group list-group-flush">
+      {% for s in top_services %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span>{{ s.service__name }}</span><span class="badge bg-secondary">{{ s.count }}</span>
+        </li>
+      {% empty %}
+        <li class="list-group-item text-muted">No services performed yet.</li>
+      {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-exclamation-triangle"></i> Almost out of stock</div>
+      <ul class="list-group list-group-flush">
+      {% for part in low_stock %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span>{{ part.name }}</span><span class="badge bg-danger">{{ part.quantity_in_stock }} left</span>
+        </li>
+      {% empty %}
+        <li class="list-group-item text-muted">Stock levels look fine.</li>
+      {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="mt-4 d-flex gap-2">
+  <a href="{% url 'customer_list' %}" class="btn btn-primary"><i class="bi bi-people"></i> Go to customers</a>
+  <a href="{% url 'job_card_list' %}" class="btn btn-outline-primary"><i class="bi bi-clipboard2-check"></i> View job cards</a>
+</div>
+
+{{ growth_labels|json_script:"growth-labels" }}
+{{ revenue_series|json_script:"revenue-series" }}
+{{ new_customers_series|json_script:"new-customers-series" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  const labels = JSON.parse(document.getElementById('growth-labels').textContent);
+  const revenue = JSON.parse(document.getElementById('revenue-series').textContent);
+  const newCustomers = JSON.parse(document.getElementById('new-customers-series').textContent);
+  const midnight = '#14163A';
+  const vanilla = '#F3E9D2';
+
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Revenue (UGX)',
+        data: revenue,
+        borderColor: midnight,
+        backgroundColor: 'rgba(20, 22, 58, 0.12)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+      }],
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } },
+    },
+  });
+
+  new Chart(document.getElementById('customersChart'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'New customers',
+        data: newCustomers,
+        backgroundColor: midnight,
+        borderRadius: 4,
+      }],
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+    },
+  });
+})();
+</script>
+{% endblock %}
