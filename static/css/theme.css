@@ -37,6 +37,15 @@ a:hover {
   align-items: center;
   gap: 0.5rem;
 }
+.oas-topbar-user {
+  color: var(--oas-vanilla);
+  font-size: 0.9rem;
+  font-weight: 500;
+  max-width: 45vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* Layout */
 .oas-layout {
@@ -57,6 +66,10 @@ a:hover {
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+  /* Logged-out pages (the login form) sit in the middle of the screen. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* Sidebar
@@ -94,6 +107,24 @@ a:hover {
   }
   .oas-sidebar .offcanvas-body {
     flex: 1 1 auto;
+  }
+  /* Pin the sidebar to the viewport so the user name and Logout button in
+     its footer stay on screen however long the page is. Only the nav list
+     scrolls if there are more links than fit; min-height: 0 on each flex
+     level lets that inner scroll actually kick in. */
+  .oas-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    align-self: flex-start;
+  }
+  .oas-sidebar .offcanvas-body,
+  .oas-sidebar .oas-sidebar-surface {
+    min-height: 0;
+  }
+  .oas-sidebar-scroll {
+    min-height: 0;
+    overflow-y: auto;
   }
 }
 .oas-sidebar-brand {
