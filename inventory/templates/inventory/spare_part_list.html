@@ -3,7 +3,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
   <h1 class="h3 mb-0"><i class="bi bi-box-seam"></i> Inventory</h1>
-  {% if user.is_superuser %}
+  {% if perms.inventory.add_inventorytransaction %}
   <a href="{% url 'spare_part_restock' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add inventory</a>
   {% endif %}
 </div>
@@ -22,13 +22,13 @@
 
 <div class="card">
   <table class="table table-hover mb-0 align-middle">
-    <thead><tr><th>Name</th><th>Compatibility</th>{% if user.is_superuser %}<th>Cost price</th>{% endif %}<th>Selling price</th><th>In stock</th><th>Stock status</th><th></th></tr></thead>
+    <thead><tr><th>Name</th><th>Compatibility</th>{% if show_cost %}<th>Cost price</th>{% endif %}<th>Selling price</th><th>In stock</th><th>Stock status</th><th></th></tr></thead>
     <tbody>
     {% for part in parts %}
       <tr>
         <td>{{ part.name }}</td>
         <td>{{ part.compatibility|default:"All vehicles" }}</td>
-        {% if user.is_superuser %}<td>UGX {{ part.cost_price|floatformat:0 }}</td>{% endif %}
+        {% if show_cost %}<td>UGX {{ part.cost_price|floatformat:0 }}</td>{% endif %}
         <td>UGX {{ part.selling_price|floatformat:0 }}</td>
         <td>{{ part.quantity_in_stock }}</td>
         <td>
@@ -52,7 +52,7 @@
         </td>
       </tr>
     {% empty %}
-      <tr><td colspan="{% if user.is_superuser %}7{% else %}6{% endif %}" class="text-center text-muted py-4">No spare parts yet.</td></tr>
+      <tr><td colspan="{% if show_cost %}7{% else %}6{% endif %}" class="text-center text-muted py-4">No spare parts yet.</td></tr>
     {% endfor %}
     </tbody>
   </table>

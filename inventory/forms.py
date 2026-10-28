@@ -1,6 +1,22 @@
+import re
+
 from django import forms
 
+from core.permissions import can_view_cost_price
+
 from .models import Service, SparePart
+
+
+class MoneyField(forms.DecimalField):
+    """A DecimalField that accepts amounts the way people actually type them,
+    e.g. "20,000" or "UGX 20000". Rendered as a plain text box because a
+    browser number input rejects commas and silently blocks the submit."""
+    widget = forms.TextInput(attrs={'inputmode': 'decimal'})
+
+    def to_python(self, value):
+        if isinstance(value, str):
+            value = re.sub(r'(?i)ugx|[,\s]', '', value)
+        return super().to_python(value)
 
 
 class ServiceForm(forms.ModelForm):
@@ -25,7 +41,7 @@ class SparePartForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         if user is not None:
-            if not user.is_superuser:
+            if not can_view_cost_price(user):
                 del self.fields['cost_price']
             if not user.has_perm('inventory.change_sparepart_price'):
                 del self.fields['selling_price']
@@ -34,7 +50,7 @@ class SparePartForm(forms.ModelForm):
 class RestockForm(forms.Form):
     spare_part = forms.ModelChoiceField(queryset=SparePart.objects.filter(active=True))
     quantity = forms.IntegerField(min_value=1)
-    unit_cost = forms.DecimalField(
+    unit_cost = MoneyField(
         min_value=0, max_digits=10, decimal_places=2,
         label='Cost price per unit (UGX)',
         help_text='What you paid the supplier per unit — updates the part\'s cost price.',

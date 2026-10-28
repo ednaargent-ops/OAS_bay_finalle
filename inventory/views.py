@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
 
-from core.decorators import superuser_required
+from core.permissions import can_view_cost_price
 
 from .forms import RestockForm, ServiceForm, SparePartForm
 from .models import InventoryTransaction, Service, SparePart
@@ -32,6 +32,7 @@ def spare_part_list(request):
 
     return render(request, 'inventory/spare_part_list.html', {
         'parts': page_obj, 'query': query, 'extra_qs': extra_qs,
+        'show_cost': can_view_cost_price(request.user),
     })
 
 
@@ -135,7 +136,8 @@ def service_delete(request, pk):
     return redirect('service_list')
 
 
-@superuser_required
+@login_required
+@permission_required('inventory.add_inventorytransaction', raise_exception=True)
 def spare_part_restock(request):
     if request.method == 'POST':
         form = RestockForm(request.POST)

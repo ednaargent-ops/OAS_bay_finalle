@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from core.permissions import can_view_cost_price
+
 from .models import InventoryTransaction, Service, SparePart
 
 
@@ -25,13 +27,13 @@ class SparePartAdmin(admin.ModelAdmin):
 
     def get_list_display(self, request):
         fields = super().get_list_display(request)
-        if not request.user.is_superuser:
+        if not can_view_cost_price(request.user):
             fields = [f for f in fields if f != 'cost_price']
         return fields
 
     def get_fields(self, request, obj=None):
         fields = super().get_fields(request, obj)
-        if not request.user.is_superuser:
+        if not can_view_cost_price(request.user):
             fields = [f for f in fields if f != 'cost_price']
         return fields
 
